@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Charm Store — украшения ручной работы</title>
+  <meta name="description" content="Charm Store — нежные украшения ручной работы. Каталог, корзина и конструктор своего уникального изделия ✨"/>
+  <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23F7C9D4'/%3E%3Cstop offset='1' stop-color='%23F5E9E2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' fill='url(%23g)'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='Arial' font-size='54' fill='black'%3ECS%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --pink:#F7C9D4; --beige:#F5E9E2; --white:#fff; --ink:#000;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.08)
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--beige),var(--white) 40%)}
+    .container{width:min(1100px,92%);margin:0 auto}
+    .btn{border:1px solid var(--ink);background:var(--pink);color:var(--ink);border-radius:999px;padding:10px 18px;cursor:pointer;transition:.2s}
+    .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+    .btn-outline{background:transparent}
+    .btn-primary{background:var(--pink)}
+    .btn.small{padding:6px 10px;border-radius:8px}
+    .btn.icon{display:inline-flex;align-items:center;gap:6px}
+    .btn.danger{background:#fff3f3;border-color:#af1e1e}
+
+    /* Header + Nav */
+    .site-header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);border-bottom:1px solid #00000010}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+    .brand{display:flex;align-items:center;gap:10px}
+    .avatar{width:36px;height:36px;border-radius:50%;border:1px solid #00000030;object-fit:cover;background:#fff}
+    .brand-name{margin:0;font-size:20px}
+    .brand-tag{margin:0;font-size:12px;opacity:.8}
+    .nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .nav a, .nav button.link{color:var(--ink);text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid #00000015;background:#fff}
+    .nav a:hover,.nav button.link:hover{background:var(--beige)}
+    .cart-pill{display:inline-flex;align-items:center;gap:6px}
+
+    /* Sections */
+    section{scroll-margin-top:80px}
+    .hero{padding:34px 0}
+    .hero-inner{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center}
+    @media(max-width:900px){.hero-inner{grid-template-columns:1fr}}
+    .hero-card{background:var(--white);border:1px solid #00000010;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .hero-img{height:220px;border-radius:10px;border:1px dashed #00000040;background:radial-gradient(100px 100px at 20% 30%, #ffffffcc, transparent), linear-gradient(135deg,var(--pink),var(--beige)); background-size: cover; background-position: center;}
+    .section{padding:32px 0}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .section-head h3{margin:0;font-size:26px}
+    .muted{opacity:.8}
+
+    /* Tabs (hash nav) */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+    .tab{border:1px solid #00000020;background:#fff;border-radius:999px;padding:8px 14px;text-decoration:none;color:var(--ink)}
+    .tab.active,.tab:hover{background:var(--beige)}
+
+    /* Catalog */
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+    .filter-btn{border:1px solid var(--ink);background:transparent;border-radius:999px;padding:8px 12px;cursor:pointer}
+    .filter-btn.active,.filter-btn:hover{background:var(--beige)}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    @media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:480px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid #00000012;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+    .card-img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#fff;border-bottom:1px solid #00000010}
+    .card-body{padding:12px;display:flex;flex-direction:column;gap:8px}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .qty{display:inline-flex;align-items:center;border:1px solid #00000030;border-radius:10px;overflow:hidden}
+    .qty button{background:#fff;border:0;padding:6px 10px;cursor:pointer}
+    .qty input{width:44px;text-align:center;border:0;padding:6px 0}
+
+    /* Constructor */
+    .constructor .wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:900px){.constructor .wrap{grid-template-columns:1fr}}
+    .panel{background:#fff;border:1px solid #00000010;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #00000030;border-radius:999px;padding:6px 10px;background:#fff;cursor:pointer}
+    .chip .dot{width:18px;height:18px;border-radius:50%;border:1px solid #00000040}
+    .chip.active,.chip:hover{background:var(--beige)}
+    .beads{display:flex;flex-wrap:wrap;gap:8px}
+    .bead{display:flex;align-items:center;gap:6px;border:1px solid #00000030;border-radius:999px;padding:6px 10px;background:#fff}
+    .bead .sw{width:16px;height:16px;border-radius:50%;border:1px solid #00000040}
+    .strand{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;border:1px dashed #00000030;border-radius:12px;padding:10px;background:#fff}
+    .bead-pill{display:flex;align-items:center;gap:6px;border:1px solid #00000030;border-radius:999px;padding:6px 8px;background:#fff}
+    .bead-pill .sw{width:14px;height:14px;border-radius:50%;border:1px solid #00000040}
+    .pill-actions button{border:1px solid #00000030;background:transparent;border-radius:6px;padding:2px 6px;cursor:pointer}
+    .totals{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .badge{border:1px solid #00000030;padding:6px 10px;border-radius:999px;background:#fff}
+    .note{font-size:12px;opacity:.8}
+
+    /* New styles for visualizer */
+    .visualizer-wrapper{margin-top:20px;padding-bottom:10px;border-bottom:1px solid #ddd}
+    .visualizer{
+      width:100%; height:40px; margin:20px 0; background-image:linear-gradient(90deg,#00000020 1px,transparent 1px),linear-gradient(90deg,#00000020 1px,transparent 1px);
+      background-size:20px 100%,10px 100%;
+      background-position:0 0, 10px 0;
+      background-repeat:repeat-x;
+      position:relative;
+      overflow-x:auto;
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      gap:0;
+    }
+    .visualizer-bead{
+      flex-shrink:0;
+      border-radius:50%;
+      box-shadow:0 1px 3px rgba(0,0,0,.3);
+      border:1px solid #00000020;
+      position:relative;
+    }
+    .visualizer-info{position:absolute;top:100%;left:0;margin-top:6px;font-size:12px;color:var(--ink);opacity:.8;display:none}
+    .visualizer-bead:hover .visualizer-info{display:block}
+    .visualizer-bead.active{border:2px solid var(--pink)}
+    .progress-bar{
+      position:absolute;
+      left:0;
+      top:50%;
+      height:2px;
+      background:var(--pink);
+      transition:width .3s ease;
+      transform:translateY(-50%);
+    }
+
+    /* Cart */
+    .cart-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #00000015;border-radius:12px;overflow:hidden}
+    .cart-table th,.cart-table td{padding:10px;border-bottom:1px solid #00000010;text-align:left;vertical-align:middle}
+    .cart-total{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:12px}
+    .empty{opacity:.7;text-align:center;padding:20px}
+
+    /* Footer */
+    .site-footer{border-top:1px solid #00000010;padding:16px 0;background:rgba(255,255,255,.6);margin-top:24px}
+    .footer-inner{display:flex;align-items:center;justify-content:space-between}
+
+    /* Floating WhatsApp */
+    .fab-wa{position:fixed;right:16px;bottom:16px;z-index:40;border:1px solid var(--ink);background:var(--pink);padding:12px 16px;border-radius:999px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow)}
+    .fab-wa:hover{transform:translateY(-1px)}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <img id="avatar" class="avatar" alt="Аватар"/>
+        <div>
+          <h1 class="brand-name">Charm Store ✨</h1>
+          <p class="brand-tag">украшения ручной работы • создавай своё 🎀</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#about">О магазине</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#builder">Создай своё</a>
+        <a href="#contacts">Контакты</a>
+        <button id="openAddModal" class="link">Добавить изделие</button>
+        <button id="setAvatarBtn" class="link">Аватар</button>
+        <input id="avatarFile" type="file" accept="image/*" hidden/>
+        <button id="openCart" class="link cart-pill">🧺 Корзина <span id="cartCount" class="badge" style="margin-left:6px">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-inner">
+        <div>
+          <h2>Нежные украшения + конструктор уникальных изделий ✨</h2>
+          <p class="muted">Белые, розовые и бежевые оттенки, натуральные материалы и ручная работа. Соберите своё ожерелье, браслет или брелок — онлайн, как вживую.</p>
+          <div class="tabs">
+            <a class="tab" href="#about">О магазине</a>
+            <a class="tab" href="#catalog">Каталог</a>
+            <a class="tab" href="#builder">Создай своё</a>
+            <a class="tab" href="#contacts">Контакты</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div id="heroImg" class="hero-img" role="img" aria-label="Пастельная композиция украшений"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-head">
+          <h3>О нашем магазине 🎀</h3>
+          <div class="row">
+            <button id="editAboutBtn" class="btn btn-outline small">✏️ Редактировать</button>
+          </div>
+        </div>
+        <div id="aboutContent" style="line-height:1.6"></div>
+      </div>
+    </section>
+
+    <section class="section" id="catalog">
+      <div class="container">
+        <div class="section-head">
+          <h3>Каталог ✨</h3>
+          <div class="row muted">Добавляйте товары через «Добавить изделие». Фото/текст хранятся в вашем браузере.</div>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">Все</button>
+          <button class="filter-btn" data-filter="bracelets">Браслеты</button>
+          <button class="filter-btn" data-filter="necklaces">Ожерелья</button>
+          <button class="filter-btn" data-filter="rings">Кольца</button>
+          <button class="filter-btn" data-filter="earrings">Серьги</button>
+          <button class="filter-btn" data-filter="chains">Цепочки</button>
+          <button class="filter-btn" data-filter="keychains">Брелки</button>
+        </div>
+        <div id="productsGrid" class="grid"></div>
+        <p id="emptyState" class="empty">Пока нет товаров. Нажмите «Добавить изделие», чтобы загрузить фото.</p>
+      </div>
+    </section>
+
+    <section class="section constructor" id="builder">
+      <div class="container">
+        <div class="section-head">
+          <h3>Создай своё уникальное изделие 💫</h3>
+          <div class="muted">Выберите тип, длину и материалы. Нажимайте на бусины — они добавятся на «нить». Можно менять порядок и удалять.</div>
+        </div>
+
+        <div class="wrap">
+          <div class="panel">
+            <div class="row" style="margin-bottom:6px"><span class="muted">Тип изделия:</span></div>
+            <div class="row" id="typeRow">
+              <button class="chip" data-type="keychain"><span class="dot"></span>Брелок</button>
+              <button class="chip" data-type="bracelet"><span class="dot"></span>Браслет</button>
+              <button class="chip" data-type="necklace"><span class="dot"></span>Ожерелье</button>
+            </div>
+
+            <div class="row" style="margin:10px 0 6px"><span class="muted">Длина (см):</span></div>
+            <div class="row" id="sizeRow">
+              <button class="chip" data-size="keychain:12">12</button>
+              <button class="chip" data-size="bracelet:16">16</button>
+              <button class="chip" data-size="bracelet:17">17</button>
+              <button class="chip" data-size="bracelet:19">19</button>
+              <button class="chip" data-size="necklace:40">40</button>
+              <button class="chip" data-size="necklace:45">45</button>
+              <button class="chip" data-size="necklace:50">50</button>
+            </div>
+
+            <div class="row" style="margin:10px 0 6px"><span class="muted">Материалы:</span></div>
+            <div id="beadsList" class="beads"></div>
+
+            <div class="row" style="margin-top:10px">
+              <button id="addCustomBead" class="btn btn-outline small">➕ Добавить свой материал</button>
+              <button id="resetMaterials" class="btn btn-outline small">♻️ Сбросить список</button>
+            </div>
+            <p class="note">Вы можете добавить свои варианты (например «Жемчуг Майорка 8мм», цена и цвет). Потом они останутся в списке.</p>
+          </div>
+
+          <div class="panel">
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <strong>Ваш дизайн — предпросмотр нити</strong>
+              <div class="row">
+                <button id="clearDesign" class="btn btn-outline small">Очистить</button>
+                <button id="exportDesign" class="btn btn-outline small">Экспорт</button>
+                <input id="importFile" type="file" accept="application/json" hidden/>
+                <button id="importDesign" class="btn btn-outline small">Импорт</button>
+              </div>
+            </div>
+
+            <div id="beadVisualizer" class="visualizer-wrapper">
+                <div class="visualizer">
+                  <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="strand" class="strand" aria-label="Нить с бусинами"></div>
+
+            <div class="totals">
+              <span class="badge">Тип: <span id="t_type">—</span></span>
+              <span class="badge">Длина: <span id="t_length">—</span></span>
+              <span class="badge">Бусин: <span id="t_count">0</span></span>
+              <span class="badge">Стоимость: <span id="t_price">0 ₸</span></span>
+            </div>
+
+            <label class="row" style="gap:8px;margin-top:8px"><span class="muted">Комментарий к заказу:</span>
+              <input id="userNote" type="text" placeholder="Напр.: застёжка золото, размер 17 см" style="flex:1;padding:8px 10px;border:1px solid #00000040;border-radius:10px"/>
+            </label>
+
+            <div class="row" style="justify-content:flex-end;margin-top:8px;gap:8px">
+              <button id="addDesignToCart" class="btn">🧺 В корзину</button>
+              <button id="orderWA" class="btn btn-primary">📲 Заказать в WhatsApp</button>
+            </div>
+
+            <p class="note" style="margin-top:8px">Подсказки: жмите по материалам сверху — они добавятся ниже. У каждой «таблетки» есть ◀️ ▶️ и ✕. Цена и длина пересчитываются автоматически.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contacts">
+      <div class="container">
+        <div class="section-head">
+          <h3>Контакты 🤍</h3>
+          <div class="row">
+            <button id="editIG" class="btn btn-outline small">Изменить Instagram</button>
+          </div>
+        </div>
+        <div class="row" style="gap:12px;flex-wrap:wrap">
+          <a id="igLink" class="btn" target="_blank" href="https://instagram.com/charmstore">📸 Наш Instagram</a>
+          <a id="waLink" class="btn btn-primary" target="_blank">📲 WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cartSection" style="display:none">
+      <div class="container">
+        <div class="section-head">
+          <h3>Ваша корзина 🧺</h3>
+          <button id="closeCart" class="btn btn-outline small">Закрыть</button>
+        </div>
+
+        <div id="cartEmpty" class="empty">Корзина пуста.</div>
+        <table id="cartTable" class="cart-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Товар/Дизайн</th>
+              <th>Цена</th>
+              <th>Кол-во</th>
+              <th>Сумма</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cartBody"></tbody>
+        </table>
+        <div class="cart-total">
+          <strong>Итого:</strong> <span id="cartTotal">0 ₸</span>
+          <button id="checkoutWA" class="btn btn-primary">Оформить в WhatsApp</button>
+          <button id="clearCart" class="btn btn-outline">Очистить</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>©️ <span id="year"></span> Charm Store</span>
+      <div>
+        <a class="tab" href="#about">О магазине</a>
+        <a class="tab" href="#catalog">Каталог</a>
+        <a class="tab" href="#builder">Создай своё</a>
+        <a class="tab" href="#contacts">Контакты</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog id="addModal">
+    <form id="addProductForm" method="dialog" style="padding:16px;min-width:min(520px,92vw)">
+      <h3 style="margin:0 0 10px">Добавить изделие в каталог</h3>
+      <div class="row" style="gap:12px;flex-wrap:wrap">
+        <label style="flex:1;display:grid;gap:6px">Название
+          <input type="text" name="name" required placeholder="Напр. Pearl Blossom"/>
+        </label>
+        <label style="width:160px;display:grid;gap:6px">Цена (₸)
+          <input type="number" name="price" required min="0" step="10" placeholder="12000"/>
+        </label>
+        <label style="width:220px;display:grid;gap:6px">Категория
+          <select name="category" required>
+            <option value="bracelets">Браслеты</option>
+            <option value="necklaces">Ожерелья</option>
+            <option value="rings">Кольца</option>
+            <option value="earrings">Серьги</option>
+            <option value="chains">Цепочки</option>
+            <option value="keychains">Брелки</option>
+          </select>
+        </label>
+      </div>
+      <label style="display:grid;gap:6px;margin-top:8px">Описание
+        <textarea name="desc" rows="3" placeholder="Материалы, стиль, размеры..."></textarea>
+      </label>
+      <label style="display:grid;gap:6px;margin-top:8px">Фото
+        <input type="file" name="image" accept="image/*" required/>
+      </label>
+      <div class="row" style="justify-content:flex-end;margin-top:12px;gap:8px">
+        <button class="btn btn-outline" value="cancel">Отмена</button>
+        <button id="submitAdd" class="btn btn-primary" value="default">Добавить</button>
+      </div>
+      <p class="note" style="margin-top:8px">Данные сохранятся в LocalStorage (вашем браузере).</p>
+    </form>
+  </dialog>
+
+  <dialog id="aboutModal">
+    <form id="aboutForm" method="dialog" style="padding:16px;min-width:min(520px,92vw)">
+      <h3 style="margin:0 0 10px">Редактировать «О магазине»</h3>
+      <textarea id="aboutInput" rows="10" style="width:100%;padding:10px;border:1px solid #00000030;border-radius:10px"></textarea>
+      <div class="row" style="justify-content:flex-end;margin-top:12px">
+        <button class="btn btn-outline" value="cancel">Отмена</button>
+        <button id="saveAbout" class="btn btn-primary" value="default">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <a id="fabWa" class="fab-wa" target="_blank">WhatsApp</a>
+
+  <script>
+    // ====== CONSTANTS & KEYS ======
+    const YEAR = document.getElementById('year'); YEAR.textContent = new Date().getFullYear();
+    const AVATAR_KEY='csAvatar', ABOUT_KEY='csAbout', IG_KEY='csIG', PRODUCTS_KEY='csProducts', CART_KEY='csCart', MATERIALS_KEY='csMaterials', DESIGN_KEY='csDesign';
+    const WA_RAW = '87785094161'; // ваш номер
+    const WA_NUM = /^8\\d{10}$/.test(WA_RAW) ? '7'+WA_RAW.slice(1) : WA_RAW;
+    const WA_URL = `https://wa.me/${WA_NUM}`;
+
+    // ====== AVATAR & FAVICON & HERO IMG ======
+    const avatarImg=document.getElementById('avatar'), setAvatarBtn=document.getElementById('setAvatarBtn'), avatarFile=document.getElementById('avatarFile'), favicon=document.getElementById('favicon');
+    const heroImg=document.getElementById('heroImg');
+    function placeholderSVG(label='CS'){
+      const pink=getComputedStyle(document.documentElement).getPropertyValue('--pink').trim();
+      const beige=getComputedStyle(document.documentElement).getPropertyValue('--beige').trim();
+      const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='${pink}'/><stop offset='100%' stop-color='${beige}'/></linearGradient></defs><rect width='320' height='320' rx='28' fill='url(#g)'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='128' fill='black' opacity='.9'>${label}</text></svg>`;
+      return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    }
+    function loadAvatar(){ const a=localStorage.getItem(AVATAR_KEY); if(a){ avatarImg.src=a; favicon.href=a; heroImg.style.backgroundImage = `url('${a}')` } else { avatarImg.src=placeholderSVG(); heroImg.style.backgroundImage = `url('${placeholderSVG('Charm Store')}')` } }
+    function saveAvatar(data){ localStorage.setItem(AVATAR_KEY,data); loadAvatar(); }
+    setAvatarBtn.addEventListener('click',()=>avatarFile.click());
+    avatarFile.addEventListener('change',()=>{const f=avatarFile.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>saveAvatar(r.result); r.readAsDataURL(f);});
+    loadAvatar();
+
+    // ====== ABOUT ======
+    const aboutDefault = `Добро пожаловать в Charm Store — уютное пространство в белых, розовых и бежевых оттенках 🤍🌸
+Мы создаём нежные украшения вручную и даём вам возможность собрать своё уникальное изделие онлайн ✨`;
+    const aboutContent=document.getElementById('aboutContent'), editAboutBtn=document.getElementById('editAboutBtn'), aboutModal=document.getElementById('aboutModal'), aboutInput=document.getElementById('aboutInput'), saveAbout=document.getElementById('saveAbout');
+    function renderAbout(){ const t=localStorage.getItem(ABOUT_KEY)||aboutDefault; aboutContent.innerText=t; }
+    editAboutBtn.addEventListener('click',()=>{ aboutInput.value=localStorage.getItem(ABOUT_KEY)||aboutDefault; aboutModal.showModal(); });
+    saveAbout.addEventListener('click',(e)=>{ e.preventDefault(); localStorage.setItem(ABOUT_KEY, aboutInput.value||aboutDefault); aboutModal.close(); renderAbout(); });
+    renderAbout();
+
+    // ====== CONTACTS ======
+    const igLink=document.getElementById('igLink'), editIG=document.getElementById('editIG'), waLink=document.getElementById('waLink'), fabWa=document.getElementById('fabWa');
+    function renderIG(){ const h=localStorage.getItem(IG_KEY)||'charmstore'; igLink.href=`https://instagram.com/${h}`; }
+    editIG.addEventListener('click',()=>{ const cur=localStorage.getItem(IG_KEY)||'charmstore'; const next=prompt('Введите Instagram @username (без @):', cur); if(next){ localStorage.setItem(IG_KEY,next.replace(/^@/,'')); renderIG(); }});
+    renderIG(); waLink.href=WA_URL; fabWa.href=WA_URL;
+
+    // ====== HELPERS ======
+    const money = v => (v||0).toLocaleString('ru-RU')+' ₸';
+    function fileToDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+    // ====== CATALOG ======
+    const grid=document.getElementById('productsGrid'), emptyState=document.getElementById('emptyState');
+    const addModal=document.getElementById('addModal'), openAdd=document.getElementById('openAddModal'), addForm=document.getElementById('addProductForm'), submitAdd=document.getElementById('submitAdd');
+    const filterBtns=[...document.querySelectorAll('.filter-btn')];
+    const CATS=['bracelets','necklaces','rings','earrings','chains','keychains'];
+    function getProducts(){ try{ return JSON.parse(localStorage.getItem(PRODUCTS_KEY)||'[]'); }catch(_){ return []; } }
+    function saveProducts(list){ localStorage.setItem(PRODUCTS_KEY, JSON.stringify(list)); }
+    function seedProducts(){
+      const exists=getProducts(); if(exists.length) return;
+      saveProducts([
+        {id:crypto.randomUUID(), name:'Pearl Blossom', price:12000, category:'necklaces', desc:'Натуральный жемчуг, фурнитура под золото.', image:placeholderSVG('Фото')},
+        {id:crypto.randomUUID(), name:'Minimal Chain', price:7500, category:'chains', desc:'Тонкая цепочка, гипоаллергенная сталь.', image:placeholderSVG('Фото')},
+        {id:crypto.randomUUID(), name:'Rose Quartz', price:9900, category:'bracelets', desc:'Браслет с розовым кварцем.', image:placeholderSVG('Фото')},
+        {id:crypto.randomUUID(), name:'Dainty Ring', price:6000, category:'rings', desc:'Аккуратное кольцо, регулируемый размер.', image:placeholderSVG('Фото')}
+      ]);
+    }
+    function productCard(p){
+      const el=document.createElement('article'); el.className='card';
+      const img=document.createElement('img'); img.className='card-img'; img.src=p.image||placeholderSVG('Фото'); img.alt=p.name;
+      const body=document.createElement('div'); body.className='card-body';
+      const title=document.createElement('div'); title.style.fontWeight='600'; title.textContent=p.name;
+      const price=document.createElement('div'); price.style.fontWeight='600'; price.textContent=money(p.price);
+      const desc=document.createElement('div'); desc.className='muted'; desc.textContent=p.desc||'';
+      const qtyWrap=document.createElement('div'); qtyWrap.className='row';
+      const qty=document.createElement('div'); qty.className='qty';
+      const minus=document.createElement('button'); minus.textContent='−';
+      const input=document.createElement('input'); input.type='number'; input.min='1'; input.value='1';
+      const plus=document.createElement('button'); plus.textContent='+';
+      minus.onclick=()=>{ const v=Math.max(1, parseInt(input.value||'1')-1); input.value=v; };
+      plus.onclick=()=>{ const v=Math.max(1, parseInt(input.value||'1')+1); input.value=v; };
+      qty.append(minus,input,plus);
+      const addBtn=document.createElement('button'); addBtn.className='btn'; addBtn.textContent='🧺 В корзину';
+      addBtn.onclick=()=>{ addToCart({type:'product', id:p.id, name:p.name, price:p.price, qty:parseInt(input.value||'1')}); };
+      qtyWrap.append(qty, addBtn);
+      body.append(title, price, desc, qtyWrap);
+      el.append(img, body);
+      return el;
+    }
+    function renderCatalog(filter='all'){
+      const list=getProducts();
+      grid.innerHTML='';
+      const shown=list.filter(p=> filter==='all' ? true : p.category===filter);
+      if(shown.length===0){ emptyState.style.display='block'; } else { emptyState.style.display='none'; shown.forEach(p=>grid.appendChild(productCard(p))); }
+    }
+    filterBtns.forEach(b=> b.addEventListener('click', ()=>{
+      filterBtns.forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderCatalog(b.dataset.filter);
+    }));
+    openAdd.addEventListener('click',()=>addModal.showModal());
+    addForm.addEventListener('submit', async (e)=>{
+      if(e.submitter!==submitAdd) return; e.preventDefault();
+      const fd=new FormData(addForm);
+      const file=fd.get('image'); if(!file || !file.size){ alert('Загрузите фото'); return; }
+      const product={
+        id: crypto.randomUUID(),
+        name: fd.get('name'),
+        price: Number(fd.get('price')||0),
+        category: fd.get('category'),
+        desc: fd.get('desc')||'',
+        image: await fileToDataURL(file)
+      };
+      const list=getProducts(); list.unshift(product); saveProducts(list);
+      addForm.reset(); addModal.close();
+      const active=document.querySelector('.filter-btn.active')?.dataset.filter||'all'; renderCatalog(active);
+    });
+
+    // ====== MATERIALS (for builder, editable) ======
+    function getMaterials(){
+      try{ const s=localStorage.getItem(MATERIALS_KEY); if(s) return JSON.parse(s); }catch(_){}
+      const base=[
+        {id:'pearl-6', name:'Жемчуг 6мм', color:'#f7f3f0', price:350, size:6, group:'Жемчуг'},
+        {id:'pearl-8', name:'Жемчуг 8мм', color:'#f3ede9', price:450, size:8, group:'Жемчуг'},
+        {id:'pearl-pink', name:'Жемчуг розовый 6мм', color:'#F7C9D4', price:400, size:6, group:'Жемчуг'},
+        {id:'pearl-white', name:'Жемчуг белый 8мм', color:'#ffffff', price:480, size:8, group:'Жемчуг'},
+        {id:'ceramic-pink', name:'Керамика розовая 8мм', color:'#F7C9D4', price:200, size:8, group:'Керамика'},
+        {id:'ceramic-beige', name:'Керамика бежевая 8мм', color:'#F5E9E2', price:200, size:8, group:'Керамика'},
+        {id:'ceramic-white', name:'Керамика белая 8мм', color:'#ffffff', price:200, size:8, group:'Керамика'},
+        {id:'spacer-gold', name:'Разделитель золото 4мм', color:'#e7d18a', price:120, size:4, group:'Фурнитура'},
+        {id:'heart-gold', name:'Сердечко золото 6мм', color:'#e1c76d', price:220, size:6, group:'Фурнитура'},
+        {id:'crystal-clear', name:'Кристалл прозрачный 6мм', color:'#e6f4ff', price:280, size:6, group:'Кристаллы'}
+      ];
+      localStorage.setItem(MATERIALS_KEY, JSON.stringify(base));
+      return base;
+    }
+    function saveMaterials(list){ localStorage.setItem(MATERIALS_KEY, JSON.stringify(list)); }
+    const beadsList=document.getElementById('beadsList'), addCustomBead=document.getElementById('addCustomBead'), resetMaterials=document.getElementById('resetMaterials');
+    function renderMaterials(){
+      beadsList.innerHTML='';
+      const mats=getMaterials();
+      mats.forEach(m=>{
+        const b=document.createElement('button'); b.className='bead'; b.type='button';
+        const sw=document.createElement('span'); sw.className='sw'; sw.style.background=m.color;
+        b.append(sw, document.createTextNode(`${m.name} • ${money(m.price)}`));
+        b.addEventListener('click',()=>addBead(m.id));
+        beadsList.appendChild(b);
+      });
+    }
+    addCustomBead.addEventListener('click',()=>{
+      const name=prompt('Название материала (напр. Жемчуг Майорка 8мм):'); if(!name) return;
+      const price=Number(prompt('Цена за 1 шт (в ₸):','250')||0);
+      const size=Number(prompt('Размер (мм):','8')||8);
+      const color=prompt('HEX-цвет (напр. #F7C9D4):','#F7C9D4');
+      const mats=getMaterials(); mats.push({id:'m-'+crypto.randomUUID().slice(0,8), name, color, price, size, group:'Материал'});
+      saveMaterials(mats); renderMaterials();
+    });
+    resetMaterials.addEventListener('click',()=>{
+      if(confirm('Сбросить список материалов к значениям по умолчанию?')){
+        localStorage.removeItem(MATERIALS_KEY); renderMaterials();
+      }
+    });
+
+    // ====== BUILDER (design) ======
+    const typeRow=document.getElementById('typeRow'), sizeRow=document.getElementById('sizeRow');
+    const strand=document.getElementById('strand');
+    const t_type=document.getElementById('t_type'), t_length=document.getElementById('t_length'), t_count=document.getElementById('t_count'), t_price=document.getElementById('t_price');
+    const importDesignBtn=document.getElementById('importDesign'), importFile=document.getElementById('importFile'), exportDesignBtn=document.getElementById('exportDesign'), clearDesignBtn=document.getElementById('clearDesign');
+    const addDesignToCart=document.getElementById('addDesignToCart'), orderWA=document.getElementById('orderWA'), userNote=document.getElementById('userNote');
+    const beadVisualizer=document.querySelector('.visualizer'), progressBar=document.getElementById('progressBar');
+
+    const presets={ keychain:{label:'Брелок', defaultLen:12}, bracelet:{label:'Браслет', defaultLen:17}, necklace:{label:'Ожерелье', defaultLen:40} };
+    let design = (()=>{ try{ return JSON.parse(localStorage.getItem(DESIGN_KEY)||'{"type":"bracelet","len":17,"beads":[]}'); }catch(_){ return {type:'bracelet',len:17,beads:[]}; } })();
+
+    function saveDesign(){ localStorage.setItem(DESIGN_KEY, JSON.stringify(design)); }
+    function setType(t){ design.type=t; design.len=presets[t]?.defaultLen||design.len; saveDesign(); renderDesign(); highlightChips(); }
+    function setLen(t, len){ design.type=t; design.len=len; saveDesign(); renderDesign(); highlightChips(); }
+    function addBead(id){ design.beads.push(id); saveDesign(); renderDesign(); }
+    function moveBead(i,dir){ const j=i+dir; if(j<0||j>=design.beads.length) return; const tmp=design.beads[i]; design.beads[i]=design.beads[j]; design.beads[j]=tmp; saveDesign(); renderDesign(); }
+    function removeBead(i){ design.beads.splice(i,1); saveDesign(); renderDesign(); }
+    function calcTotals(){
+      const mats=getMaterials();
+      const price = design.beads.reduce((s,id)=>s+(mats.find(x=>x.id===id)?.price||0),0);
+      const mm = design.beads.reduce((s,id)=>s+(mats.find(x=>x.id===id)?.size||0),0);
+      const cmApprox=(mm/10).toFixed(1);
+      return {price, mm, cmApprox};
+    }
+    function renderDesign(){
+      strand.innerHTML='';
+      beadVisualizer.innerHTML = '';
+      const mats=getMaterials();
+      const {price, mm, cmApprox}=calcTotals();
+
+      // Render visual beads
+      design.beads.forEach((id,idx)=>{
+        const m=mats.find(x=>x.id===id);
+        const sizePx = m?.size * 2 || 16;
+        const color = m?.color || '#ddd';
+        
+        const beadEl = document.createElement('div');
+        beadEl.className = 'visualizer-bead';
+        beadEl.style.width = `${sizePx}px`;
+        beadEl.style.height = `${sizePx}px`;
+        beadEl.style.backgroundColor = color;
+        beadEl.style.border = '1px solid #000';
+        beadEl.style.marginLeft = `${m?.size}px`;
+        
+        const infoEl = document.createElement('div');
+        infoEl.className = 'visualizer-info';
+        infoEl.textContent = `${m?.name || id} (${m?.size} мм)`;
+        beadEl.append(infoEl);
+        
+        beadVisualizer.append(beadEl);
+      });
+      
+      // Update progress bar
+      const totalWidthPx = beadVisualizer.scrollWidth;
+      const targetLengthMm = design.len * 10;
+      const progressPercent = Math.min(100, (mm / targetLengthMm) * 100);
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Render text beads
+      design.beads.forEach((id,idx)=>{
+        const m=mats.find(x=>x.id===id);
+        const pill=document.createElement('div'); pill.className='bead-pill';
+        const sw=document.createElement('span'); sw.className='sw'; sw.style.background=m?.color||'#ddd';
+        const name=document.createElement('span'); name.textContent=m?.name||id;
+        const act=document.createElement('span'); act.className='pill-actions';
+        const left=document.createElement('button'); left.textContent='◀️'; left.title='Влево'; left.onclick=()=>moveBead(idx,-1);
+        const right=document.createElement('button'); right.textContent='▶️'; right.title='Вправо'; right.onclick=()=>moveBead(idx,+1);
+        const del=document.createElement('button'); del.textContent='✕'; del.title='Удалить'; del.onclick=()=>removeBead(idx);
+        act.append(left,right,del); pill.append(sw,name,act); strand.appendChild(pill);
+      });
+      
+      const info=presets[design.type]||{label:design.type};
+      t_type.textContent=info.label; t_length.textContent=`${design.len} см (≈${cmApprox} см собрано)`; t_count.textContent=String(design.beads.length); t_price.textContent=money(price);
+    }
+    function highlightChips(){
+      [...typeRow.querySelectorAll('.chip')].forEach(c=>c.classList.toggle('active', c.dataset.type===design.type));
+      [...sizeRow.querySelectorAll('.chip')].forEach(c=>{
+        const [t,l]=c.dataset.size.split(':'); c.classList.toggle('active', t===design.type && Number(l)===Number(design.len));
+      });
+    }
+    typeRow.addEventListener('click',(e)=>{ const b=e.target.closest('.chip'); if(!b) return; setType(b.dataset.type); });
+    sizeRow.addEventListener('click',(e)=>{ const b=e.target.closest('.chip'); if(!b) return; const [t,l]=b.dataset.size.split(':'); setLen(t, Number(l)); });
+
+    exportDesignBtn.addEventListener('click',()=>{
+      const blob=new Blob([JSON.stringify(design,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='charm-design.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
+    });
+    importDesignBtn.addEventListener('click',()=>importFile.click());
+    importFile.addEventListener('change',()=>{
+      const f=importFile.files[0]; if(!f) return;
+      const r=new FileReader(); r.onload=()=>{ try{ const data=JSON.parse(r.result); if(!data || !Array.isArray(data.beads)) throw Error('Неверный формат'); design=data; saveDesign(); renderDesign(); highlightChips(); alert('Дизайн импортирован!'); }catch(e){ alert('Ошибка импорта: '+e.message);} }; r.readAsText(f);
+    });
+    clearDesignBtn.addEventListener('click',()=>{ if(confirm('Очистить текущий дизайн?')){ design.beads=[]; saveDesign(); renderDesign(); }});
+
+    // Add design to cart
+    addDesignToCart.addEventListener('click', ()=>{
+      if(design.beads.length===0){ alert('Добавьте материалы в дизайн'); return; }
+      const {price}=calcTotals();
+      addToCart({type:'design', payload:design, name:`Дизайн: ${(presets[design.type]?.label)||design.type} ${design.len} см`, price:price, qty:1, note:userNote.value||''});
+      alert('Дизайн добавлен в корзину 🧺');
+    });
+
+    // Order design via WhatsApp
+    orderWA.addEventListener('click', ()=>{
+      if(design.beads.length===0){ alert('Добавьте материалы в дизайн'); return; }
+      const mats=getMaterials(); const {price, cmApprox}=calcTotals(); const label=(presets[design.type]?.label)||design.type;
+      const counts={}; design.beads.forEach(id=>counts[id]=(counts[id]||0)+1);
+      const lines=Object.entries(counts).map(([id,c])=>`• ${(mats.find(m=>m.id===id)?.name||id)} × ${c}`).join('%0A');
+      const msg=`Здравствуйте! Хочу заказать кастомное изделие.%0AТип: ${encodeURIComponent(label)}%0AДлина: ${encodeURIComponent(design.len+' см (≈'+cmApprox+' см собрано)')}%0AСостав:%0A${encodeURIComponent(lines)}%0AИтог: ${encodeURIComponent(money(price))}%0AКомментарий: ${encodeURIComponent(userNote.value||'')}`;
+      window.open(`${WA_URL}?text=${msg}`,'_blank');
+    });
+
+    renderMaterials(); highlightChips(); renderDesign();
+
+    // ====== CART ======
+    const openCart=document.getElementById('openCart'), closeCart=document.getElementById('closeCart'), cartSection=document.getElementById('cartSection'), cartCount=document.getElementById('cartCount');
+    const cartBody=document.getElementById('cartBody'), cartTable=document.getElementById('cartTable'), cartEmpty=document.getElementById('cartEmpty'), cartTotal=document.getElementById('cartTotal');
+    const checkoutWA=document.getElementById('checkoutWA'), clearCart=document.getElementById('clearCart');
+
+    function getCart(){ try{ return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); }catch(_){ return []; } }
+    function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); renderCartBadge(); }
+    function renderCartBadge(){ const c=getCart().reduce((s,i)=>s+i.qty,0); cartCount.textContent=String(c); }
+    function addToCart(item){ const c=getCart(); 
+      if(item.type==='product'){
+        const idx=c.findIndex(x=> x.type==='product' && x.id===item.id);
+        if(idx>=0){ c[idx].qty += item.qty||1; } else { c.push({type:'product', id:item.id, name:item.name, price:item.price, qty:item.qty||1}); }
+      }else if(item.type==='design'){
+        c.push({type:'design', payload:item.payload, name:item.name, price:item.price, qty:item.qty||1, note:item.note||''});
+      }
+      saveCart(c);
+    }
+    function removeFromCart(i){ const c=getCart(); c.splice(i,1); saveCart(c); renderCart(); }
+    function changeQty(i, delta){ const c=getCart(); c[i].qty = Math.max(1, (c[i].qty||1)+delta); saveCart(c); renderCart(); }
+    function renderCart(){
+      const c=getCart();
+      if(c.length===0){ cartEmpty.style.display='block'; cartTable.style.display='none'; cartTotal.textContent=money(0); return; }
+      cartEmpty.style.display='none'; cartTable.style.display='table';
+      cartBody.innerHTML='';
+      let total=0;
+      c.forEach((it,i)=>{
+        const tr=document.createElement('tr');
+        const tdName=document.createElement('td');
+        tdName.innerHTML = it.type==='product'
+          ? `📦 ${it.name}`
+          : `✨ ${it.name}<br/><span class="muted" style="font-size:12px">${(it.note?'Комментарий: '+it.note:'')}</span>`;
+        const tdPrice=document.createElement('td'); tdPrice.textContent=money(it.price);
+        const tdQty=document.createElement('td');
+        const q=document.createElement('div'); q.className='qty';
+        const m=document.createElement('button'); m.textContent='−'; m.onclick=()=>changeQty(i,-1);
+        const input=document.createElement('input'); input.type='number'; input.value=it.qty; input.min='1'; input.onchange=()=>{ const v=Math.max(1,parseInt(input.value||'1')); const c=getCart(); c[i].qty=v; saveCart(c); renderCart(); };
+        const p=document.createElement('button'); p.textContent='+'; p.onclick=()=>changeQty(i,+1);
+        q.append(m,input,p); tdQty.append(q);
+        const tdSum=document.createElement('td'); const sum = (it.price||0) * (it.qty||1); total += sum; tdSum.textContent=money(sum);
+        const tdDel=document.createElement('td'); const del=document.createElement('button'); del.className='btn btn-outline small'; del.textContent='Удалить'; del.onclick=()=>removeFromCart(i); tdDel.append(del);
+        tr.append(tdName,tdPrice,tdQty,tdSum,tdDel); cartBody.appendChild(tr);
+      });
+      cartTotal.textContent=money(total);
+    }
+    openCart.addEventListener('click',()=>{ cartSection.style.display='block'; renderCart(); location.hash='#cart'; });
+    closeCart.addEventListener('click',()=>{ cartSection.style.display='none'; });
+    clearCart.addEventListener('click',()=>{ if(confirm('Очистить корзину?')){ saveCart([]); renderCart(); }});
+    checkoutWA.addEventListener('click',()=>{
+      const c=getCart(); if(c.length===0){ alert('Корзина пуста'); return; }
+      let text='Здравствуйте! Хочу оформить заказ в Charm Store.%0A%0A';
+      c.forEach((it,idx)=>{
+        if(it.type==='product'){
+          text += `${idx+1}) ${encodeURIComponent(it.name)} — ${encodeURIComponent(money(it.price))} × ${it.qty}%0A`;
+        }else{
+          const label=encodeURIComponent(it.name);
+          text += `${idx+1}) ${label} — ${encodeURIComponent(money(it.price))} × ${it.qty}%0A`;
+        }
+      });
+      text += `%0AИтого: ${encodeURIComponent(cartTotal.textContent)}%0A`;
+      window.open(`${WA_URL}?text=${text}`,'_blank');
+    });
+    renderCartBadge();
+
+    // ====== INITIALIZE CATALOG ======
+    seedProducts(); renderCatalog('all');
+
+    // ====== SIMPLE HASH TABS (highlight) ======
+    function highlightTabs(){
+      const hash=location.hash||'#about';
+      document.querySelectorAll('.tabs .tab, footer .tab, .nav a').forEach(a=>{
+        const active = a.getAttribute('href')===hash;
+        a.classList.toggle('active', active);
+      });
+    }
+    window.addEventListener('hashchange', highlightTabs); highlightTabs();
+
+    // ====== QUICK NAV BUTTONS ======
+    document.querySelectorAll('.tabs .tab, footer .tab, .nav a').forEach(a=>{
+      a.addEventListener('click',()=>setTimeout(highlightTabs,0));
+    });
+  </script>
+</body>
+</html>
